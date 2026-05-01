@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>登录 - 智能待办</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card horizontal">
+            <!-- 左侧：欢迎区域（带一言） -->
+            <div class="login-left">
+                <div class="welcome-content">
+                    <div class="logo-icon-large">✓</div>
+                    <h1 class="welcome-title">智能待办</h1>
+                    <p class="welcome-subtitle">Smart Todo List</p>
+                    
+                    <!-- 一言展示区域（打字机效果） -->
+                    <div class="hitokoto-wrapper">
+                        <div class="hitokoto-container" id="hitokotoContainer">
+                            <div class="hitokoto-content">
+                                <span class="hitokoto-text" id="hitokotoText"></span>
+                                <span class="cursor" id="cursor">|</span>
+                            </div>
+                            <p class="hitokoto-from" id="hitokotoFrom"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧：表单区域 -->
+            <div class="login-right">
+                <!-- 登录表单 -->
+                <div class="form-container" id="loginForm">
+                    <h2 class="form-title">欢迎回来</h2>
+                    <p class="form-subtitle">请登录您的账户</p>
+                    
+                    <!-- 账号选择下拉框 -->
+                    <div class="input-group" style="margin-bottom: 8px;">
+                        <span class="input-icon">📋</span>
+                        <select id="savedAccountsSelect" style="flex:1; padding: 16px 0; border: none; background: transparent; font-size: 15px;">
+                            <option value="">-- 选择已保存账号 --</option>
+                        </select>
+                        <span id="clearAccountsHint" style="font-size: 14px; color: #999; cursor: pointer; display: none;" title="清除所有保存的账号">✖️</span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <span class="input-icon">👤</span>
+                        <input type="text" id="loginUsername" placeholder="用户名" autocomplete="username">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="loginPassword" placeholder="密码" autocomplete="current-password">
+                    </div>
+                    
+                    <div class="options-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="saveAccountCheckbox"> 记住此账号
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="autoLoginCheckbox"> 自动登录
+                        </label>
+                    </div>
+                    
+                    <button id="doLoginBtn" class="btn btn-primary">登 录</button>
+                    
+                    <div class="form-footer">
+                        <p class="switch-mode">
+                            还没有账号？
+                            <a href="javascript:void(0)" id="showRegisterBtn">立即注册</a>
+                        </p>
+                        <p class="switch-mode delete-account">
+                            <a href="javascript:void(0)" id="showDeleteAccountBtn" style="color: #dc3545;">🗑️ 删除账户</a>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 注册表单 -->
+                <div class="form-container" id="registerForm" style="display: none;">
+                    <h2 class="form-title">创建账户</h2>
+                    <p class="form-subtitle">开始您的效率之旅</p>
+                    
+                    <div class="input-group">
+                        <span class="input-icon">👤</span>
+                        <input type="text" id="regUsername" placeholder="用户名 (3-20个字符)" autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="regPassword" placeholder="密码 (至少6位)" autocomplete="new-password">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-icon">✓</span>
+                        <input type="password" id="regConfirmPassword" placeholder="确认密码" autocomplete="off">
+                    </div>
+                    
+                    <button id="doRegisterBtn" class="btn btn-primary">注 册</button>
+                    
+                    <div class="form-footer">
+                        <p class="switch-mode">
+                            已有账号？
+                            <a href="javascript:void(0)" id="showLoginBtn">返回登录</a>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 访客模式 -->
+                <div class="guest-mode">
+                    <div class="divider">
+                        <span>或</span>
+                    </div>
+                    <button id="guestBtn" class="btn btn-guest">👋 访客体验</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 删除账户确认模态框 -->
+        <div id="deleteAccountModal" class="delete-modal">
+            <div class="delete-modal-content">
+                <div class="delete-modal-header">
+                    <h3>⚠️ 删除账户</h3>
+                    <span class="close-delete-modal">&times;</span>
+                </div>
+                <div class="delete-modal-body">
+                    <div class="warning-text">
+                        删除账户将永久清除以下数据，无法恢复：
+                    </div>
+                    <ul>
+                        <li>所有待办任务</li>
+                        <li>类型分类</li>
+                        <li>打卡记录</li>
+                        <li>运势记录</li>
+                        <li>番茄钟历史</li>
+                        <li>每周数据</li>
+                    </ul>
+                    <p class="confirm-hint">
+                        📝 请输入密码确认删除：
+                    </p>
+                    <input type="password" id="deletePassword" placeholder="输入密码">
+                </div>
+                <div class="delete-modal-footer">
+                    <button id="cancelDeleteBtn" class="delete-cancel-btn">取消</button>
+                    <button id="confirmDeleteBtn" class="delete-confirm-btn">确认删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-message" id="toastMsg" style="display: none;"></div>
+
+    <script src="login.js"></script>
+</body>
+</html>

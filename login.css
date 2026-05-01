@@ -1,0 +1,571 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 1000px;
+}
+
+/* 横向卡片布局 */
+.login-card.horizontal {
+    display: flex;
+    background: white;
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    animation: slideUp 0.5s ease;
+    min-height: 550px;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========== 左侧：欢迎区域 ========== */
+.login-left {
+    flex: 1.2;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 48px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-left::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.welcome-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: white;
+}
+
+.logo-icon-large {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 48px;
+    font-weight: bold;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-title {
+    font-size: 32px;
+    margin-bottom: 8px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.welcome-subtitle {
+    font-size: 14px;
+    opacity: 0.8;
+    letter-spacing: 4px;
+    margin-bottom: 40px;
+}
+
+/* 一言区域 - 左侧 */
+.hitokoto-wrapper {
+    margin: 30px 0;
+}
+
+.hitokoto-container {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hitokoto-content {
+    font-size: 15px;
+    line-height: 1.6;
+    font-family: 'Georgia', '楷体', 'KaiTi', serif;
+    color: white;
+    text-align: center;
+}
+
+.hitokoto-text {
+    letter-spacing: 0.5px;
+}
+
+.cursor {
+    display: inline-block;
+    width: 2px;
+    margin-left: 2px;
+    font-weight: 100;
+    animation: blink 0.8s infinite;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+.cursor.hidden {
+    animation: none;
+    opacity: 0;
+}
+
+.hitokoto-from {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    margin-top: 12px;
+    opacity: 0;
+    transform: translateY(5px);
+    transition: all 0.5s ease;
+}
+
+.hitokoto-from.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.hitokoto-from::before {
+    content: '—— ';
+}
+
+/* ========== 右侧：表单区域 ========== */
+.login-right {
+    flex: 1;
+    padding: 48px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: white;
+}
+
+.form-container {
+    width: 100%;
+}
+
+.form-title {
+    font-size: 28px;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.form-subtitle {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 32px;
+}
+
+/* 输入框样式 */
+.input-group {
+    display: flex;
+    align-items: center;
+    background: #f5f7fa;
+    border-radius: 16px;
+    margin-bottom: 16px;
+    padding: 0 16px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.input-group:focus-within {
+    background: white;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input-icon {
+    font-size: 20px;
+    color: #999;
+    margin-right: 12px;
+}
+
+.input-group input,
+.input-group select {
+    flex: 1;
+    padding: 16px 0;
+    border: none;
+    background: transparent;
+    font-size: 15px;
+    outline: none;
+    font-family: inherit;
+}
+
+.input-group select {
+    cursor: pointer;
+    color: #333;
+}
+
+.input-group input::placeholder {
+    color: #bbb;
+}
+
+/* 选项行 */
+.options-row {
+    display: flex;
+    gap: 24px;
+    margin: 16px 0 24px;
+}
+
+.checkbox-label {
+    font-size: 13px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.checkbox-label input {
+    cursor: pointer;
+}
+
+/* 按钮样式 */
+.btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-guest {
+    background: #f0f2f5;
+    color: #555;
+    margin-top: 8px;
+}
+
+.btn-guest:hover {
+    background: #e8eaef;
+    transform: translateY(-2px);
+}
+
+/* 表单底部 */
+.form-footer {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.switch-mode {
+    font-size: 13px;
+    color: #888;
+    margin-top: 12px;
+}
+
+.switch-mode a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.switch-mode a:hover {
+    text-decoration: underline;
+}
+
+.delete-account {
+    margin-top: 8px;
+}
+
+/* 分隔线 */
+.divider {
+    text-align: center;
+    margin: 24px 0 16px;
+    position: relative;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background: #e0e0e0;
+}
+
+.divider span {
+    background: white;
+    padding: 0 12px;
+    position: relative;
+    font-size: 13px;
+    color: #aaa;
+}
+
+/* Toast 提示 */
+.toast-message {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 14px;
+    z-index: 1000;
+    animation: fadeInUp 0.3s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.toast-message.success {
+    background: #28a745;
+}
+
+.toast-message.error {
+    background: #dc3545;
+}
+
+.toast-message.info {
+    background: #17a2b8;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* 删除账户模态框 */
+.delete-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(3px);
+}
+
+.delete-modal-content {
+    background-color: white;
+    margin: 10% auto;
+    width: 90%;
+    max-width: 420px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    animation: modalSlideDown 0.2s ease;
+}
+
+@keyframes modalSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.delete-modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #e8ecf0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.delete-modal-header h3 {
+    color: #dc3545;
+    font-size: 18px;
+}
+
+.close-delete-modal {
+    font-size: 28px;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.2s;
+}
+
+.close-delete-modal:hover {
+    color: #333;
+}
+
+.delete-modal-body {
+    padding: 24px;
+}
+
+.delete-modal-body .warning-text {
+    color: #dc3545;
+    font-size: 14px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: #fff5f5;
+    border-radius: 12px;
+}
+
+.delete-modal-body ul {
+    margin-left: 20px;
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+.delete-modal-body .confirm-hint {
+    background: #f0f2f5;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.delete-modal-body input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.delete-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid #e8ecf0;
+}
+
+.delete-confirm-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.delete-confirm-btn:hover {
+    background: #c82333;
+}
+
+.delete-cancel-btn {
+    background: #e9ecef;
+    color: #555;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.delete-cancel-btn:hover {
+    background: #dee2e6;
+}
+
+/* 响应式：小屏幕改为纵向 */
+@media (max-width: 768px) {
+    .login-card.horizontal {
+        flex-direction: column;
+        min-height: auto;
+    }
+    
+    .login-left {
+        padding: 40px 24px;
+    }
+    
+    .login-right {
+        padding: 36px 28px;
+    }
+    
+    .welcome-title {
+        font-size: 28px;
+    }
+    
+    .logo-icon-large {
+        width: 60px;
+        height: 60px;
+        font-size: 36px;
+    }
+    
+    .decorative-dots {
+        margin-top: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-right {
+        padding: 28px 20px;
+    }
+    
+    .form-title {
+        font-size: 24px;
+    }
+    
+    .options-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .toast-message {
+        white-space: normal;
+        text-align: center;
+        max-width: 80%;
+    }
+}

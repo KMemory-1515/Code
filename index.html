@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能待办</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- 在 head 标签内添加，用于登录检测 -->
+    <script>
+        // 检查登录状态
+        const currentUser = localStorage.getItem('current_user');
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+
+    <!-- 头部区域：诗词在左，标题在右 -->
+    <div class="header-with-fortune">
+        <!-- 左侧：诗词区域 -->
+        <div class="poem-wrapper">
+            <div class="poem-container">
+                <div class="poem-content">
+                    <span class="poem-line" id="poemLine">正在加载诗词...</span>
+                </div>
+                <span class="poem-author" id="poemAuthor"></span>
+            </div>
+        </div>
+        
+        <!-- 右侧：标题、日期和用户菜单 -->
+        <div class="title-area" style="text-align: right;">
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px;">
+                <h1>✓ 智能待办清单</h1>
+                <div class="user-menu" id="userMenu">
+                    <button id="userMenuBtn" class="user-btn">
+                        <span class="user-icon">👤</span>
+                        <span id="usernameDisplay"></span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="user-info">
+                            <span class="user-info-icon">👤</span>
+                            <span id="dropdownUsername"></span>
+                            <span id="guestBadge" class="guest-badge" style="display: none;">访客</span>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <button id="logoutBtn" class="dropdown-item logout-item">
+                            🚪 退出登录
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="current-date-wrapper" style="justify-content: flex-end;">
+                <span class="date-icon">📅</span>
+                <span class="current-date" id="currentDate"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧模块组：番茄钟 + 天气 + 打卡 + 运势 -->
+    <div class="right-modules">
+        <!-- ========== 番茄钟模块（横版长方形） ========== -->
+        <div class="pomodoro-module">
+            <div class="pomodoro-card-horizontal">
+                <div class="pomodoro-left">
+                    <div class="pomodoro-icon-large">🍅</div>
+                    <div class="pomodoro-title">番茄钟</div>
+                </div>
+                <div class="pomodoro-center">
+                    <div class="pomodoro-timer" id="pomodoroTimer">25:00</div>
+                    <div class="pomodoro-controls">
+                        <button id="pomodoroStartBtn" class="pomodoro-btn start">▶</button>
+                        <button id="pomodoroPauseBtn" class="pomodoro-btn pause" style="display: none;">⏸</button>
+                        <button id="pomodoroResetBtn" class="pomodoro-btn reset">🔄</button>
+                    </div>
+                </div>
+                <div class="pomodoro-right">
+                    <div class="time-setting">
+                        <div class="time-display" id="timeDisplayValue">25</div>
+                        <div class="time-unit">分钟</div>
+                        <div class="time-buttons">
+                            <button id="pomodoroDecreaseBtn" class="time-arrow">−</button>
+                            <button id="pomodoroIncreaseBtn" class="time-arrow">+</button>
+                        </div>
+                    </div>
+                    <button id="pomodoroSetBtn" class="set-btn-small">设置</button>
+                </div>
+            </div>
+            <div class="pomodoro-footer">
+                <div class="pomodoro-task-select" id="pomodoroTaskSelect" style="display: none;">
+                    <select id="pomodoroTaskList">
+                        <option value="">-- 关联任务（可选）--</option>
+                    </select>
+                </div>
+                <div class="pomodoro-stats">
+                    📊 今日专注: <span id="todayPomodoroCount">0</span> 个
+                </div>
+            </div>
+            <input type="hidden" id="pomodoroCustomTime" value="25">
+        </div>
+
+        <!-- ========== 天气模块 ========== -->
+        <div class="weather-module">
+            <div class="weather-card" id="weatherCard">
+                <div class="weather-loading" id="weatherLoading">
+                    <span class="weather-icon">☁️</span>
+                    <span>加载天气...</span>
+                </div>
+                <div class="weather-content" id="weatherContent" style="display: none;">
+                    <div class="weather-temp" id="weatherTemp">--°C</div>
+                    <div class="weather-desc" id="weatherDesc">--</div>
+                    <div class="weather-location" id="weatherLocation">--</div>
+                    <div class="weather-detail" id="weatherDetail"></div>
+                </div>
+            </div>
+            <button id="refreshWeatherBtn" class="weather-refresh-btn">🔄 刷新</button>
+        </div>
+
+        <!-- ========== 每日打卡模块 ========== -->
+        <div class="checkin-module">
+            <div class="checkin-card" id="checkinCard">
+                <div class="checkin-title">每日打卡</div>
+                <div class="checkin-status" id="checkinStatus">
+                    <span class="status-text">未打卡</span>
+                </div>
+                <button id="checkinBtn" class="checkin-btn">点击打卡</button>
+            </div>
+            <div class="checkin-streak" id="checkinStreak">
+                🔥 连续打卡 <span id="streakCount">0</span> 天
+            </div>
+        </div>
+
+        <!-- ========== 今日运势翻牌模块 ========== -->
+        <div class="fortune-module">
+            <div class="fortune-card-container" id="fortuneCard">
+                <div class="fortune-card-inner">
+                    <div class="fortune-front">
+                        <span class="card-back-label">今日运势</span>
+                        <span class="card-back-icon">🎴</span>
+                        <span class="card-back-hint">点击翻牌</span>
+                    </div>
+                    <div class="fortune-back" id="fortuneBack">
+                        <div class="fortune-level">?</div>
+                        <div class="fortune-message">点击卡片查看今日运势</div>
+                    </div>
+                </div>
+            </div>
+            <div class="fortune-reset">
+                <button id="resetFortuneBtn" class="reset-btn-small">🔄 重新翻牌</button>
+            </div>
+        </div>
+    </div>
+    <!-- ========== 每周待办完成趋势图模块 ========== -->
+    <div class="heatmap-module">
+        <div class="heatmap-header">
+            <h3>📊 本周待办完成趋势图</h3>
+            <p class="heatmap-subtitle">每周一自动清零 · 本周：<span id="weekRange">--</span> · 最后更新：<span id="updateDate">--</span></p>
+        </div>
+        
+        <div class="weekly-table-container">
+            <table class="weekly-table" id="weeklyTable">
+                <thead>
+                    <tr>
+                        <th>星期</th>
+                        <th>日期</th>
+                        <th>完成任务数/今日待办</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="weeklyTableBody">
+                    <!-- 动态生成 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="heatmap-actions">
+            <button id="manualRecordBtn" class="heatmap-btn">📝 手动记录今日数据</button>
+            <button id="resetWeekBtn" class="heatmap-btn reset">重置本周数据</button>
+        </div>
+        
+        <!-- 手动记录模态框 -->
+        <div id="heatmapModal" class="modal">
+            <div class="modal-content small-modal">
+                <div class="modal-header">
+                    <h3>手动记录完成数据</h3>
+                    <span class="close-heatmap-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>选择日期：</label>
+                        <input type="date" id="heatmapDate" value="">
+                    </div>
+                    <div class="form-group">
+                        <label>完成任务数：</label>
+                        <input type="number" id="heatmapCount" min="0" max="50" value="0" step="1">
+                    </div>
+                    <p class="heatmap-note">💡 提示：每天完成任务时系统会自动记录，也可手动修改本周任何一天的数据</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="confirmHeatmapBtn" class="save-btn">保存</button>
+                    <button id="cancelHeatmapBtn" class="cancel-btn">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加任务区 -->
+    <div class="add-section">
+        <input type="text" id="taskInput" placeholder="输入待办事项...">
+        <select id="categorySelect">
+            <option value="">-- 请先添加类型 --</option>
+        </select>
+        <input type="date" id="taskDate" value="">
+        
+        <select id="taskTimeSelect">
+            <option value="">-- 选择时间 --</option>
+            <option value="00:00">00:00</option>
+            <option value="01:00">01:00</option>
+            <option value="02:00">02:00</option>
+            <option value="03:00">03:00</option>
+            <option value="04:00">04:00</option>
+            <option value="05:00">05:00</option>
+            <option value="06:00">06:00</option>
+            <option value="07:00">07:00</option>
+            <option value="08:00">08:00</option>
+            <option value="09:00">09:00</option>
+            <option value="10:00">10:00</option>
+            <option value="11:00">11:00</option>
+            <option value="12:00">12:00</option>
+            <option value="13:00">13:00</option>
+            <option value="14:00">14:00</option>
+            <option value="15:00">15:00</option>
+            <option value="16:00">16:00</option>
+            <option value="17:00">17:00</option>
+            <option value="18:00">18:00</option>
+            <option value="19:00">19:00</option>
+            <option value="20:00">20:00</option>
+            <option value="21:00">21:00</option>
+            <option value="22:00">22:00</option>
+            <option value="23:00">23:00</option>
+        </select>
+
+        <!-- 新增：预计耗时选择 -->
+        <select id="taskDurationSelect">
+            <option value="">-- 预计耗时 --</option>
+            <option value="5">5 分钟</option>
+            <option value="10">10 分钟</option>
+            <option value="15">15 分钟</option>
+            <option value="20">20 分钟</option>
+            <option value="30">30 分钟</option>
+            <option value="45">45 分钟</option>
+            <option value="60">1 小时</option>
+            <option value="90">1.5 小时</option>
+            <option value="120">2 小时</option>
+            <option value="180">3 小时</option>
+            <option value="240">4 小时</option>
+            <option value="300">5 小时</option>
+            <option value="360">6 小时</option>
+            <option value="480">8 小时</option>
+        </select>
+
+        <!-- 在添加任务区域，taskDurationSelect 之后，repeatSelect 之前添加 -->
+        <select id="prioritySelect" class="priority-select">
+            <option value="1">🔴 紧急重要 (先做)</option>
+            <option value="2" selected>🟡 重要不紧急 (计划做)</option>
+            <option value="3">🟢 紧急不重要 (授权做)</option>
+            <option value="4">⚪ 不重要不紧急 (少做)</option>
+        </select>
+
+        <select id="repeatSelect">
+            <option value="none">仅此一次</option>
+            <option value="daily">每日重复</option>
+        </select>
+        <button id="addBtn">添加任务</button>
+    </div>
+
+    <!-- ========== 独立类型管理模块 ========== -->
+    <div class="category-manager">
+        <div class="manager-header">
+            <h3>📁 类型管理</h3>
+            <div class="manager-actions">
+                <button id="openAddCategoryBtn" class="btn-add-category">+ 新建类型</button>
+                <button id="openEditCategoryBtn" class="btn-edit-category">✏️ 修改类型</button>
+            </div>
+        </div>
+        
+        <div id="categoryList" class="category-list">
+            <div class="empty-category">暂无类型，点击"新建类型"创建</div>
+        </div>
+    </div>
+
+    <!-- ========== 每日重复任务管理区域 ========== -->
+    <div class="daily-task-manager">
+        <div class="manager-header">
+            <h3>🔄 每日重复任务</h3>
+            <div class="manager-actions">
+                <button id="manageDailyTasksBtn" class="btn-edit-category">管理每日任务</button>
+            </div>
+        </div>
+        <div id="dailyTaskList" class="category-list" style="min-height: 80px;">
+            <div class="empty-category">暂无每日重复任务，添加任务时选择"每日重复"即可</div>
+        </div>
+    </div>
+
+    <!-- ========== 未来任务时间线模块 ========== -->
+    <div class="future-tasks-module">
+        <div class="module-header">
+            <h3>📅 未来任务时间线</h3>
+            <div class="future-tips">
+                <span class="tip-badge">📌 按日期排列</span>
+                <span class="tip-badge">⏰ 提前规划</span>
+                <span class="tip-badge">✨ 仅显示单独任务</span>
+            </div>
+        </div>
+        <div id="futureTasksList" class="future-tasks-container">
+            <div class="empty-future-state">✨ 暂无未来任务，添加任务时选择未来的日期即可</div>
+        </div>
+    </div>
+
+    <!-- 筛选标签（动态生成） -->
+    <div class="filter-section">
+        <div class="filter-label">筛选：</div>
+        <div class="filter-tabs" id="filterTabs"></div>
+        <!-- 添加视图切换按钮 -->
+        <div class="view-switch">
+            <button id="listViewBtn" class="view-switch-btn active">📋 列表视图</button>
+            <button id="matrixViewBtn" class="view-switch-btn">📊 四象限视图</button>
+        </div>
+    </div>
+
+    <!-- 列表视图容器 -->
+    <div id="todoList" class="todo-list"></div>
+
+    <!-- 四象限视图容器（初始隐藏） -->
+    <div id="matrixView" class="matrix-view" style="display: none;">
+        <div class="matrix-grid">
+            <div class="matrix-quadrant quadrant-1">
+                <div class="quadrant-header">
+                    <span class="quadrant-icon">🔴</span>
+                    <span class="quadrant-title">紧急且重要</span>
+                    <span class="quadrant-subtitle">立即去做</span>
+                </div>
+                <div class="quadrant-tasks" id="quadrant1Tasks"></div>
+            </div>
+            <div class="matrix-quadrant quadrant-2">
+                <div class="quadrant-header">
+                    <span class="quadrant-icon">🟡</span>
+                    <span class="quadrant-title">重要不紧急</span>
+                    <span class="quadrant-subtitle">计划去做</span>
+                </div>
+                <div class="quadrant-tasks" id="quadrant2Tasks"></div>
+            </div>
+            <div class="matrix-quadrant quadrant-3">
+                <div class="quadrant-header">
+                    <span class="quadrant-icon">🟢</span>
+                    <span class="quadrant-title">紧急不重要</span>
+                    <span class="quadrant-subtitle">授权去做</span>
+                </div>
+                <div class="quadrant-tasks" id="quadrant3Tasks"></div>
+            </div>
+            <div class="matrix-quadrant quadrant-4">
+                <div class="quadrant-header">
+                    <span class="quadrant-icon">⚪</span>
+                    <span class="quadrant-title">不重要不紧急</span>
+                    <span class="quadrant-subtitle">尽量不做</span>
+                </div>
+                <div class="quadrant-tasks" id="quadrant4Tasks"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 统计面板 -->
+    <div class="stats">
+        <div class="stats-row">
+            <span>📋 总任务: <span id="totalCount">0</span></span>
+            <span>✅ 已完成: <span id="completedCount">0</span></span>
+            <span>📊 完成率: <span id="percentCount">0</span>%</span>
+        </div>
+
+        <!-- 新增：耗时统计行 -->
+        <div class="stats-row">
+            <span>⏱️ 预计总耗时: <span id="totalEstimatedTime">0</span> 分钟</span>
+            <span>✔️ 已完成耗时: <span id="completedEstimatedTime">0</span> 分钟</span>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="category-stats" id="categoryStats"></div>
+        <div class="stats-actions">
+            <button id="clearCompletedBtn" class="clear-btn">清除已完成</button>
+            <button id="exportBtn" class="export-btn">导出数据</button>
+            <button id="resetDataBtn" class="reset-btn">重置所有数据</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 新建类型模态框 ========== -->
+<div id="addCategoryModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>新建类型</h3>
+            <span class="close-add-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>类型名称：</label>
+                <input type="text" id="addCategoryName" placeholder="例如：工作、健身、阅读" maxlength="20">
+            </div>
+            <div class="form-group">
+                <label>选择图标（Emoji）：</label>
+                <div class="emoji-selector">
+                    <input type="text" id="addCategoryEmoji" placeholder="输入emoji" maxlength="2" value="📌">
+                    <span id="addEmojiPreview" class="emoji-preview">📌</span>
+                    <button type="button" id="addToggleEmojiPickerBtn" class="small-btn">常用表情</button>
+                </div>
+                <div id="addEmojiPicker" class="emoji-picker-grid" style="display: none;"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="confirmAddCategoryBtn" class="save-btn">保存</button>
+            <button id="cancelAddModalBtn" class="cancel-btn">取消</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 修改类型模态框 ========== -->
+<div id="editCategoryModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>修改类型</h3>
+            <span class="close-edit-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>选择要修改的类型：</label>
+                <select id="editCategorySelect" class="category-select-dropdown">
+                    <option value="">-- 请选择类型 --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>新的类型名称：</label>
+                <input type="text" id="editCategoryName" placeholder="输入新名称" maxlength="20">
+            </div>
+            <div class="form-group">
+                <label>新的图标（Emoji）：</label>
+                <div class="emoji-selector">
+                    <input type="text" id="editCategoryEmoji" placeholder="输入emoji" maxlength="2" value="📌">
+                    <span id="editEmojiPreview" class="emoji-preview">📌</span>
+                    <button type="button" id="editToggleEmojiPickerBtn" class="small-btn">常用表情</button>
+                </div>
+                <div id="editEmojiPicker" class="emoji-picker-grid" style="display: none;"></div>
+            </div>
+            <div class="warning-box" id="editWarning" style="display: none;">
+                ⚠️ 修改类型名称后，该类型下的所有待办事项将自动更新
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="confirmEditCategoryBtn" class="save-btn">确认修改</button>
+            <button id="deleteCategoryInEditBtn" class="delete-btn-in-modal">删除该类型</button>
+            <button id="cancelEditModalBtn" class="cancel-btn">取消</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 每日任务管理模态框 ========== -->
+<div id="dailyTaskModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>管理每日重复任务</h3>
+            <span class="close-daily-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="dailyTaskManageList" style="max-height: 400px; overflow-y: auto;">
+                <!-- 动态生成每日任务列表 -->
+            </div>
+            <div class="warning-box" style="margin-top: 15px;">
+                💡 提示：删除每日任务后，所有未完成的该任务副本也将被删除
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="closeDailyModalBtn" class="cancel-btn">关闭</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 编辑任务模态框 ========== -->
+<div id="editTaskModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>✏️ 编辑待办</h3>
+            <span class="close-edit-task-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editTaskId">
+            <div class="form-group">
+                <label>任务内容：</label>
+                <input type="text" id="editTaskText" placeholder="输入待办内容">
+            </div>
+            <div class="form-group">
+                <label>类型：</label>
+                <select id="editTaskCategorySelect"></select>
+            </div>
+            <div class="form-group">
+                <label>日期：</label>
+                <input type="date" id="editTaskDate">
+            </div>
+            <div class="form-group">
+                <label>时间：</label>
+                <select id="editTaskTimeSelect">
+                    <option value="">-- 不设置时间 --</option>
+                    <option value="00:00">00:00</option>
+                    <option value="01:00">01:00</option>
+                    <option value="02:00">02:00</option>
+                    <option value="03:00">03:00</option>
+                    <option value="04:00">04:00</option>
+                    <option value="05:00">05:00</option>
+                    <option value="06:00">06:00</option>
+                    <option value="07:00">07:00</option>
+                    <option value="08:00">08:00</option>
+                    <option value="09:00">09:00</option>
+                    <option value="10:00">10:00</option>
+                    <option value="11:00">11:00</option>
+                    <option value="12:00">12:00</option>
+                    <option value="13:00">13:00</option>
+                    <option value="14:00">14:00</option>
+                    <option value="15:00">15:00</option>
+                    <option value="16:00">16:00</option>
+                    <option value="17:00">17:00</option>
+                    <option value="18:00">18:00</option>
+                    <option value="19:00">19:00</option>
+                    <option value="20:00">20:00</option>
+                    <option value="21:00">21:00</option>
+                    <option value="22:00">22:00</option>
+                    <option value="23:00">23:00</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>预计耗时：</label>
+                <select id="editTaskDurationSelect">
+                    <option value="">-- 不设置 --</option>
+                    <option value="5">5 分钟</option>
+                    <option value="10">10 分钟</option>
+                    <option value="15">15 分钟</option>
+                    <option value="20">20 分钟</option>
+                    <option value="30">30 分钟</option>
+                    <option value="45">45 分钟</option>
+                    <option value="60">1 小时</option>
+                    <option value="90">1.5 小时</option>
+                    <option value="120">2 小时</option>
+                    <option value="180">3 小时</option>
+                    <option value="240">4 小时</option>
+                    <option value="300">5 小时</option>
+                    <option value="360">6 小时</option>
+                    <option value="480">8 小时</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>优先级：</label>
+                <select id="editTaskPrioritySelect">
+                    <option value="1">🔴 紧急重要 (先做)</option>
+                    <option value="2">🟡 重要不紧急 (计划做)</option>
+                    <option value="3">🟢 紧急不重要 (授权做)</option>
+                    <option value="4">⚪ 不重要不紧急 (少做)</option>
+                </select>
+            </div>
+            <div class="warning-box" id="editTaskWarning" style="display: none;">
+                ⚠️ 修改日期后，任务会移动到对应日期
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="confirmEditTaskBtn" class="save-btn">保存修改</button>
+            <button id="cancelEditTaskBtn" class="cancel-btn">取消</button>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</body>
+</html>
